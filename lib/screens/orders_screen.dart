@@ -14,32 +14,33 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  var _isLoading = false;
+  /* Ao fazer o fetch no initstate dos nossos dados
+  e posteriormente passar esses dados para uma variavel
+  que vai ser o nosso builder, evitamos que quando alguma
+  coisa muda no nosso widget, ele não vai buscar os dados
+  todos novamente.
+  (Não se aplica aqui visto que não mudamos nada dentro do widget) */
+  Future _ordersFuture;
 
-  // @override
-  // void initState() {
-  //   Future.delayed(Duration.zero).then((_) async {
-  //     setState(() {
-  //       _isLoading = true;
-  //     });
-  //     await Provider.of<Orders>(context, listen: false).fetchAndSetOrders();
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   });
-  //   super.initState();
-  // }
+  Future _obtainOrdersFuture() {
+    return Provider.of<Orders>(context, listen: false).fetchAndSetOrders();
+  }
+
+  @override
+  void initState() {
+    _ordersFuture = _obtainOrdersFuture();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    //final orderData = Provider.of<Orders>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Your orders"),
       ),
       drawer: AppDrawer(),
       body: FutureBuilder(
-        future: Provider.of<Orders>(context, listen: false).fetchAndSetOrders(),
+        future: _ordersFuture,
         builder: ((context, dataSnapshot) {
           if (dataSnapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
